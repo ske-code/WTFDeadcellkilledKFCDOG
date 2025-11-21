@@ -309,35 +309,59 @@ local totalunnamedflags = 0
 function utility.dragify(main, dragoutline, object)
     local start, objectposition, dragging, currentpos
 
-    local function handleInput(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            start = input.Position
-            dragoutline.Visible = true
-            objectposition = object.Position
-        end
+    local function handleInput()
+        dragging = true
+        start = services.InputService:GetMouseLocation()
+        dragoutline.Visible = true
+        objectposition = object.Position
     end
 
     local function handleMove(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             if dragging then
-                currentpos = UDim2.new(objectposition.X.Scale, objectposition.X.Offset + (input.Position - start).X, objectposition.Y.Scale, objectposition.Y.Offset + (input.Position - start).Y)
+                local delta = input.Position - start
+                currentpos = UDim2.new(
+                    objectposition.X.Scale, 
+                    objectposition.X.Offset + delta.X,
+                    objectposition.Y.Scale, 
+                    objectposition.Y.Offset + delta.Y
+                )
                 dragoutline.Position = currentpos
             end
         end
     end
 
-    local function handleEnd(input)
-        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and dragging then 
+    local function handleEnd()
+        if dragging then 
             dragging = false
             dragoutline.Visible = false
-            object.Position = currentpos
+            if currentpos then
+                object.Position = currentpos
+            end
         end
     end
 
-    main.MouseButton1Down:Connect(handleInput)
+    if main.MouseButton1Down then
+        main.MouseButton1Down:Connect(handleInput)
+    else
+        utility.connect(services.InputService.InputBegan, function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                handleInput()
+            end
+        end)
+    end
+
     utility.connect(services.InputService.InputChanged, handleMove)
-    utility.connect(services.InputService.InputEnded, handleEnd)
+    
+    if main.MouseButton1Up then
+        main.MouseButton1Up:Connect(handleEnd)
+    else
+        utility.connect(services.InputService.InputEnded, function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                handleEnd()
+            end
+        end)
+    end
 end
 
 function utility.textlength(str, font, fontsize)
