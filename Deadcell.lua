@@ -1647,8 +1647,28 @@ function library:new_window(cfg)
     
     local window_pages_holder = utility.create("Square", {Parent = window_holder, Visible = true, Transparency = 0, Size = UDim2.new(1,0,0,25), Position = UDim2.new(0,0,0,0), Thickness = 1, Filled = true, ZIndex = 3})
     
-    local window_drag = utility.create("Square", {Parent = window_outline, Visible = true, Transparency = 0, Size = UDim2.new(1,0,0,10), Position = UDim2.new(0,0,0,0), Thickness = 1, Filled = true, ZIndex = 10})
-    
+    local window_drag = utility.create("Square", {
+    Parent = window_outline, 
+    Visible = true, 
+    Transparency = 0, 
+    Size = UDim2.new(1,0,0,10), 
+    Position = UDim2.new(0,0,0,0), 
+    Thickness = 1, 
+    Filled = true, 
+    ZIndex = 10
+})
+
+local dragoutline = utility.create("Square", {
+    Size = UDim2.new(0, size_x, 0, size_y),
+    Position = utility.getcenter(size_x, size_y),
+    Filled = false,
+    Thickness = 1,
+    Theme = "Accent",
+    ZIndex = 1,
+    Visible = false,
+})
+
+utility.dragify(window_drag, dragoutline, window_outline)  
     local dragoutline = utility.create("Square", {
         Size = UDim2.new(0, size_x, 0, size_y),
         Position = utility.getcenter(size_x, size_y),
