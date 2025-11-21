@@ -2,20 +2,7 @@ local settings = {folder_name = "visajas"; default_accent = Color3.fromRGB(61, 1
 library = library or {}
 library.connections = library.connections or {}
 
-function utility.connect(signal, callback)
-    if not signal or not signal.Connect then
-        return nil
-    end
-    local ok, connection = pcall(function()
-        return signal:Connect(callback)
-    end)
-    if not ok or not connection then
-        return nil
-    end
-    library.connections = library.connections or {}
-    table.insert(library.connections, connection)
-    return connection
-end
+
 local function load_custom_font()
     local v2="Font_"..tostring(math.random(10000,99999)) local v24="Folder_"..tostring(math.random(10000,99999)) if isfolder("UI_Fonts") then delfolder("UI_Fonts") end makefolder(v24) local v3=v24.."/"..v2..".ttf" local v4=v24.."/"..v2..".json" local v5=v24.."/"..v2..".rbxmx" 
     if not isfile(v3) then local v8=pcall(function() local v9=request({Url="https://raw.githubusercontent.com/bluescan/proggyfonts/refs/heads/master/ProggyOriginal/ProggyClean.ttf",Method="GET"}) if v9 and v9.Success then writefile(v3,v9.Body) return true end return false end) if not v8 then return Font.fromEnum(Enum.Font.Code) end end
@@ -98,7 +85,21 @@ function utility.getrgb(color) local r = color.R * 255 local g = color.G * 255 l
 function utility.changecolor(color, number) local r, g, b = utility.getrgb(color) r, g, b = math.clamp(r + number, 0, 255), math.clamp(g + number, 0, 255), math.clamp(b + number, 0, 255) return Color3.fromRGB(r, g, b) end
 function utility.nextflag() totalunnamedflags = totalunnamedflags + 1 return string.format("%.14g", totalunnamedflags) end
 function utility.rgba(r, g, b, alpha) local rgb = Color3.fromRGB(r, g, b) local mt = table.clone(getrawmetatable(rgb)) setreadonly(mt, false) local old = mt.__index mt.__index = newcclosure(function(self, key) if key:lower() == "a" then return alpha end return old(self, key) end) setrawmetatable(rgb, mt) return rgb end
-function utility.connect(signal, callback) local connection = signal:Connect(callback) if library.connections then table.insert(library.connections, connection) end return connection end
+--function utility.connect(signal, callback) local connection = signal:Connect(callback) if library.connections then table.insert(library.connections, connection) end return connection end
+function utility.connect(signal, callback)
+    if not signal or not signal.Connect then
+        return nil
+    end
+    local ok, connection = pcall(function()
+        return signal:Connect(callback)
+    end)
+    if not ok or not connection then
+        return nil
+    end
+    library.connections = library.connections or {}
+    table.insert(library.connections, connection)
+    return connection
+end
 function utility.disconnect(connection) if library.connections then local index = table.find(library.connections, connection) connection:Disconnect() if index then table.remove(library.connections, index) end end end
 local themes = {["Default"] = {["Accent"] = settings.default_accent, ["Window Outline Background"] = Color3.fromRGB(39,39,47), ["Window Inline Background"] = Color3.fromRGB(23,23,30), ["Window Holder Background"] = Color3.fromRGB(32,32,38), ["Page Unselected"] = Color3.fromRGB(32,32,38), ["Page Selected"] = Color3.fromRGB(55,55,64), ["Section Background"] = Color3.fromRGB(27,27,34), ["Section Inner Border"] = Color3.fromRGB(50,50,58), ["Section Outer Border"] = Color3.fromRGB(19,19,27), ["Window Border"] = Color3.fromRGB(58,58,67), ["Text"] = Color3.fromRGB(245, 245, 245), ["Risky Text"] = Color3.fromRGB(245, 239, 120), ["Object Background"] = Color3.fromRGB(41,41,50)}}
 local themeobjects = {} local library = {theme = table.clone(themes.Default), currentcolor = nil, folder = "visajas", flags = {}, open = true, mousestate = services.InputService.MouseIconEnabled, cursor = nil, holder = nil, connections = {}, notifications = {}} local decode = (syn and syn.crypt.base64.decode) or (crypt and crypt.base64decode) or base64_decode
