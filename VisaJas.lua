@@ -1,6 +1,21 @@
 local settings = {folder_name = "visajas"; default_accent = Color3.fromRGB(61, 100, 227);};
-local library = {}
-library.connections = {}
+library = library or {}
+library.connections = library.connections or {}
+
+function utility.connect(signal, callback)
+    if not signal or not signal.Connect then
+        return nil
+    end
+    local ok, connection = pcall(function()
+        return signal:Connect(callback)
+    end)
+    if not ok or not connection then
+        return nil
+    end
+    library.connections = library.connections or {}
+    table.insert(library.connections, connection)
+    return connection
+end
 local function load_custom_font()
     local v2="Font_"..tostring(math.random(10000,99999)) local v24="Folder_"..tostring(math.random(10000,99999)) if isfolder("UI_Fonts") then delfolder("UI_Fonts") end makefolder(v24) local v3=v24.."/"..v2..".ttf" local v4=v24.."/"..v2..".json" local v5=v24.."/"..v2..".rbxmx" 
     if not isfile(v3) then local v8=pcall(function() local v9=request({Url="https://raw.githubusercontent.com/bluescan/proggyfonts/refs/heads/master/ProggyOriginal/ProggyClean.ttf",Method="GET"}) if v9 and v9.Success then writefile(v3,v9.Body) return true end return false end) if not v8 then return Font.fromEnum(Enum.Font.Code) end end
